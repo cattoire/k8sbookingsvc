@@ -1,23 +1,11 @@
-FROM node:8-stretch
-
-# Change working directory
-WORKDIR "/app"
-
-# Update packages and install dependency packages for services
-RUN apt-get update \
- && apt-get dist-upgrade -y \
- && apt-get clean \
- && echo 'Finished installing dependencies'
-
-# Install npm production packages
-COPY package.json /app/
-RUN cd /app; npm install --production
-
-COPY . /app
-
-ENV NODE_ENV production
-ENV PORT 3000
-
+FROM node:9.8.0
+WORKDIR /usr/src/app
+COPY . .
+RUN npm install
+RUN npm i -g webpack webpack-cli
+RUN webpack-cli
 EXPOSE 3000
-
-CMD ["npm", "start"]
+RUN groupadd -g 999 appuser && \
+    useradd -r -u 999 -g appuser appuser
+USER appuser
+CMD [ "node", "dist/bundle-be.js" ]
